@@ -1,11 +1,26 @@
 import mongoose from "mongoose";
 
-const lostItemSchema = new mongoose.Schema({
-  title: String,
-  description: String,
-  location: String,
-  status: { type: String, enum: ["lost", "found"], default: "lost" },
-  image: String,
-}, { timestamps: true });
+const lostSchema = new mongoose.Schema(
+  {
+    title: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    description: String,
+    location: String,
+    contact: String,
+    image: String,
+    status: {
+      type: String,
+      default: "lost",
+    },
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
+  },
+  { timestamps: true }
+);
 
-export default mongoose.model("LostItem", lostItemSchema);
+export default mongoose.model("LostItem", lostSchema);

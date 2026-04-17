@@ -1,10 +1,16 @@
 import mongoose from "mongoose";
 
 const resourceSchema = new mongoose.Schema({
-  title: String,
-  description: String,
+  title: {
+    type: String,
+    required: true,
+    trim: true,
+  },
   file: String,
-  uploadedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
-}, { timestamps: true });
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+  },
+});
 
 export default mongoose.model("Resource", resourceSchema);

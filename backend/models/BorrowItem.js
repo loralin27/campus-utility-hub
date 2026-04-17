@@ -1,11 +1,14 @@
 import mongoose from "mongoose";
 
 const borrowSchema = new mongoose.Schema({
-  itemName: String,
-  description: String,
+  itemName: {
+    type: String,
+    required: true,
+    trim: true,
+  },
+  status: { type: String, default: "available" },
   owner: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
   borrower: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
-  status: { type: String, enum: ["available", "requested", "borrowed"], default: "available" }
-}, { timestamps: true });
+});
 
 export default mongoose.model("BorrowItem", borrowSchema);
