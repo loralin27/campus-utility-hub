@@ -1,11 +1,10 @@
 import LostItem from "../models/LostItem.js";
 
-// ➕ ADD ITEM
+//  ADD ITEM
 export const addLostItem = async (req, res) => {
   try {
     const { title } = req.body;
 
-    // ✅ validation
     if (!title || title.trim() === "") {
       return res.status(400).json({ message: "Title required" });
     }
@@ -13,7 +12,8 @@ export const addLostItem = async (req, res) => {
     const item = await LostItem.create({
       ...req.body,
       image: req.file?.filename,
-      user: req.user._id, // 🔐 owner
+      user: req.user._id,
+      status: "lost", //  ensure default
     });
 
     res.json(item);
@@ -22,7 +22,8 @@ export const addLostItem = async (req, res) => {
   }
 };
 
-// 📥 GET ALL ITEMS
+
+//  GET ALL ITEMS
 export const getLostItems = async (req, res) => {
   try {
     const items = await LostItem.find();
@@ -32,7 +33,8 @@ export const getLostItems = async (req, res) => {
   }
 };
 
-// 🔄 MARK AS FOUND (ONLY OWNER)
+
+//  MARK AS FOUND (ONLY OWNER)
 export const markFound = async (req, res) => {
   try {
     const item = await LostItem.findById(req.params.id);
@@ -41,8 +43,14 @@ export const markFound = async (req, res) => {
       return res.status(404).json({ message: "Item not found" });
     }
 
+    //  OWNER CHECK
     if (item.user.toString() !== req.user._id.toString()) {
-      return res.status(403).json({ message: "Not owner" });
+      return res.status(403).json({ message: "Only owner can update" });
+    }
+
+    //  ALREADY FOUND CHECK
+    if (item.status === "found") {
+      return res.status(400).json({ message: "Already marked as found" });
     }
 
     item.status = "found";
@@ -54,7 +62,8 @@ export const markFound = async (req, res) => {
   }
 };
 
-// ❌ DELETE ITEM (ONLY OWNER)
+
+//  DELETE ITEM (ONLY OWNER)
 export const deleteLostItem = async (req, res) => {
   try {
     const item = await LostItem.findById(req.params.id);

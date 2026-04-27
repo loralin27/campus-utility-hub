@@ -11,16 +11,16 @@ import {
 
 const router = express.Router();
 
-// 📥 get all
+//  get all
 router.get("/", getLostItems);
 
-// ➕ add (with image)
+//  add (with image)
 router.post("/", protect, upload.single("image"), addLostItem);
 
-// 🔄 mark found
+//  mark found
 router.put("/:id/claim", protect, markFound);
 
-// ❌ delete
+//  delete
 router.delete("/:id", protect, deleteLostItem);
 
 export default router;

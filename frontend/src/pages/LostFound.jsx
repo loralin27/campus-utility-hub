@@ -12,43 +12,54 @@ function LostFound() {
   }, []);
 
   const fetchItems = () => {
-    API.get("/lost").then((res) => setItems(res.data));
+    API.get("/lost")
+      .then((res) => setItems(res.data))
+      .catch(() => alert("Failed to load items"));
   };
 
-  // ➕ ADD ITEM
+  //  ADD ITEM
   const addItem = async () => {
-    if (!user) {
-      alert("Please login first");
-      return;
-    }
+    if (!user) return alert("Please login first");
 
     if (!form.title || !form.title.trim()) {
-      alert("Title required");
-      return;
+      return alert("Title required");
     }
 
-    const formData = new FormData();
-    for (let key in form) {
-      formData.append(key, form[key]);
-    }
+    try {
+      const formData = new FormData();
+      for (let key in form) {
+        formData.append(key, form[key]);
+      }
 
-    await API.post("/lost", formData);
-    fetchItems();
+      await API.post("/lost", formData);
+
+      setForm({}); //  RESET FORM
+      fetchItems();
+    } catch {
+      alert("Error adding item");
+    }
   };
 
-  // 🔄 MARK FOUND
+  // MARK FOUND
   const claimItem = async (id) => {
-    await API.put(`/lost/${id}/claim`);
-    fetchItems();
+    try {
+      await API.put(`/lost/${id}/claim`);
+      fetchItems();
+    } catch (err) {
+      alert(err.response?.data?.message || "Error");
+    }
   };
 
   // ❌ DELETE
   const deleteItem = async (id) => {
-    await API.delete(`/lost/${id}`);
-    fetchItems();
+    try {
+      await API.delete(`/lost/${id}`);
+      fetchItems();
+    } catch {
+      alert("Delete failed");
+    }
   };
 
-  // 🔒 NOT LOGGED IN UI
   if (!user) {
     return (
       <div className="container mt-5 text-center">
@@ -62,10 +73,11 @@ function LostFound() {
       <h2>🔍 Lost & Found</h2>
 
       {/* FORM */}
-      <div className="card p-3 mb-3">
+      <div className="card p-3 mb-4 shadow-sm">
         <input
           placeholder="Title"
           className="form-control mb-2"
+          value={form.title || ""}
           onChange={(e) =>
             setForm({ ...form, title: e.target.value })
           }
@@ -74,6 +86,7 @@ function LostFound() {
         <input
           placeholder="Description"
           className="form-control mb-2"
+          value={form.description || ""}
           onChange={(e) =>
             setForm({ ...form, description: e.target.value })
           }
@@ -82,6 +95,7 @@ function LostFound() {
         <input
           placeholder="Location"
           className="form-control mb-2"
+          value={form.location || ""}
           onChange={(e) =>
             setForm({ ...form, location: e.target.value })
           }
@@ -90,6 +104,7 @@ function LostFound() {
         <input
           placeholder="Contact"
           className="form-control mb-2"
+          value={form.contact || ""}
           onChange={(e) =>
             setForm({ ...form, contact: e.target.value })
           }
@@ -103,7 +118,7 @@ function LostFound() {
           }
         />
 
-        <button className="btn btn-primary" onClick={addItem}>
+        <button className="btn btn-primary w-25" onClick={addItem}>
           Add Item
         </button>
       </div>
@@ -112,35 +127,48 @@ function LostFound() {
       {items
         .filter((i) => i.title?.trim())
         .map((item) => (
-          <div key={item._id} className="card p-3 mb-2">
+          <div key={item._id} className="card p-3 mb-3 shadow-sm">
+
             <h5>{item.title}</h5>
-            <p>{item.description}</p>
+
+            {item.description && (
+              <p className="text-muted mb-1">{item.description}</p>
+            )}
+
+            {item.location && (
+              <small className="text-secondary">
+                📍 {item.location}
+              </small>
+            )}
 
             {item.image && (
               <img
                 src={`http://localhost:5000/uploads/${item.image}`}
                 width="120"
+                className="mt-2 rounded"
                 alt=""
               />
             )}
 
             {/* STATUS */}
-            <span
-              className={`badge ${
-                item.status === "lost"
-                  ? "bg-danger"
-                  : "bg-success"
-              }`}
-            >
-              {item.status}
-            </span>
+            <div className="mt-2">
+              <span
+                className={`badge ${
+                  item.status === "lost"
+                    ? "bg-danger"
+                    : "bg-success"
+                }`}
+              >
+                {item.status}
+              </span>
+            </div>
 
-            {/* OWNER ACTIONS (SAFE CHECK) */}
+            {/* OWNER ACTIONS */}
             {item.user === user?._id && (
-              <>
+              <div className="mt-3">
                 {item.status === "lost" && (
                   <button
-                    className="btn btn-warning mt-2 me-2"
+                    className="btn btn-warning me-2"
                     onClick={() => claimItem(item._id)}
                   >
                     Mark Found
@@ -148,12 +176,12 @@ function LostFound() {
                 )}
 
                 <button
-                  className="btn btn-danger mt-2"
+                  className="btn btn-danger"
                   onClick={() => deleteItem(item._id)}
                 >
                   Delete
                 </button>
-              </>
+              </div>
             )}
           </div>
         ))}

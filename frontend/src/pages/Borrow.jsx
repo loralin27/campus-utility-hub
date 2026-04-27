@@ -5,7 +5,7 @@ function Borrow() {
   const [items, setItems] = useState([]);
   const [name, setName] = useState("");
 
-  // ✅ SAFE USER
+  //  SAFE USER
   const user = JSON.parse(localStorage.getItem("user"));
 
   useEffect(() => {
@@ -16,7 +16,7 @@ function Borrow() {
     API.get("/borrow").then((res) => setItems(res.data));
   };
 
-  // ➕ ADD ITEM
+  //  ADD ITEM
   const addItem = async () => {
     if (!user) {
       alert("Please login first");
@@ -33,7 +33,7 @@ function Borrow() {
     fetchItems();
   };
 
-  // 🙋 REQUEST ITEM
+  //  REQUEST ITEM
   const requestItem = async (id) => {
     if (!user) {
       alert("Please login first");
@@ -44,13 +44,13 @@ function Borrow() {
     fetchItems();
   };
 
-  // ✅ APPROVE ITEM
+  //  APPROVE ITEM
   const approveItem = async (id) => {
     await API.put(`/borrow/${id}/approve`);
     fetchItems();
   };
 
-  // 🔒 IF NOT LOGGED IN
+  //  IF NOT LOGGED IN
   if (!user) {
     return (
       <div className="container mt-5 text-center">
@@ -61,7 +61,7 @@ function Borrow() {
 
   return (
     <div className="container mt-4">
-      <h2>📦 Borrow System</h2>
+      <h2> Borrow System</h2>
 
       {/* ADD ITEM */}
       <div className="card p-3 mb-3">
